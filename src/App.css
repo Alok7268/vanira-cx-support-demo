@@ -1,0 +1,143 @@
+.app-wrapper {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+header {
+  padding: 24px 0;
+  border-bottom: 1px solid var(--paper-border);
+  background-color: var(--paper-bg);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-family: var(--font-serif);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--paper-fg);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-icon {
+  color: var(--paper-accent);
+}
+
+.nav-links {
+  display: flex;
+  gap: 32px;
+}
+
+.nav-links a {
+  color: var(--paper-fg);
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+main {
+  flex: 1;
+  padding: 64px 0;
+}
+
+.hero-section {
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto 64px;
+}
+
+.hero-title {
+  font-size: 3.5rem;
+  margin-bottom: 16px;
+  color: var(--paper-fg);
+}
+
+.hero-subtitle {
+  font-size: 1.2rem;
+  color: var(--paper-subtle);
+  margin-bottom: 40px;
+  font-family: var(--font-serif);
+  font-style: italic;
+}
+
+.grid-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: start;
+}
+
+.tracking-widget {
+  padding: 40px;
+}
+
+.tracking-widget h2 {
+  font-size: 2rem;
+  margin-bottom: 24px;
+}
+
+.input-group {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.support-categories {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.category-card {
+  padding: 24px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.category-icon {
+  color: var(--paper-accent);
+}
+
+.category-title {
+  font-size: 1.2rem;
+}
+
+.category-desc {
+  font-size: 0.9rem;
+  color: var(--paper-subtle);
+}
+
+footer {
+  padding: 48px 0;
+  border-top: 1px solid var(--paper-border);
+  margin-top: auto;
+  text-align: center;
+  color: var(--paper-subtle);
+  font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+  .grid-layout {
+    grid-template-columns: 1fr;
+  }
+  
+  .hero-title {
+    font-size: 2.5rem;
+  }
+  
+  .nav-links {
+    display: none; /* simple responsive approach for now */
+  }
+}
