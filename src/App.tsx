@@ -11,6 +11,10 @@ function App() {
   const [highlightedElement, setHighlightedElement] = useState<string | null>(null);
   const [dynamicOptions, setDynamicOptions] = useState<{prompt: string, options: string[]} | null>(null);
   const [triggerAction, setTriggerAction] = useState<((name: string, data: any) => void) | null>(null);
+  
+  const [requestDetailsPrompt, setRequestDetailsPrompt] = useState<string | null>(null);
+  const [detailEmail, setDetailEmail] = useState('');
+  const [detailOrderId, setDetailOrderId] = useState('');
 
   const handleRegisterActionTrigger = useCallback((fn: (name: string, data: any) => void) => {
     setTriggerAction(() => fn);
@@ -32,6 +36,20 @@ function App() {
       triggerAction('option_clicked', { selected_option: opt });
     }
     setDynamicOptions(null);
+  };
+
+  const handleRequestOrderDetails = (prompt: string) => {
+    setRequestDetailsPrompt(prompt);
+  };
+
+  const handleDetailsSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (triggerAction) {
+      triggerAction('order_details_submitted', { email: detailEmail, order_id: detailOrderId });
+    }
+    setRequestDetailsPrompt(null);
+    setDetailEmail('');
+    setDetailOrderId('');
   };
 
   const doTrack = (num: string) => {
@@ -189,6 +207,7 @@ function App() {
                 onOpenFaq={handleOpenFaq}
                 onHighlightElement={handleHighlight}
                 onShowOptions={handleShowOptions}
+                onRequestOrderDetails={handleRequestOrderDetails}
                 registerActionTrigger={handleRegisterActionTrigger}
               />
             </div>
@@ -201,6 +220,46 @@ function App() {
           <p>&copy; {new Date().getFullYear()} Poste Support. All rights reserved.</p>
         </div>
       </footer>
+
+      {requestDetailsPrompt && (
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+          <div className="paper-card animate-slide-up" style={{ maxWidth: '500px', width: '100%' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+              <h2 style={{ fontSize: '1.5rem' }}>{requestDetailsPrompt}</h2>
+              <button onClick={() => setRequestDetailsPrompt(null)} style={{ background: 'transparent', color: 'var(--paper-subtle)' }}>
+                <X size={24} />
+              </button>
+            </div>
+            <form onSubmit={handleDetailsSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500 }}>Email Address</label>
+                <input 
+                  type="email" 
+                  required
+                  className="paper-input" 
+                  placeholder="your@email.com" 
+                  value={detailEmail}
+                  onChange={e => setDetailEmail(e.target.value)}
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 500 }}>Order ID</label>
+                <input 
+                  type="text" 
+                  required
+                  className="paper-input" 
+                  placeholder="e.g. PST-1234-5678" 
+                  value={detailOrderId}
+                  onChange={e => setDetailOrderId(e.target.value)}
+                />
+              </div>
+              <button type="submit" className="paper-btn paper-btn-accent" style={{ marginTop: '8px' }}>
+                Submit Details
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
 
       {showFaqModal && (
         <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>

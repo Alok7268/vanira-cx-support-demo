@@ -10,6 +10,7 @@ interface VoiceAgentProps {
   onOpenFaq?: () => void;
   onHighlightElement?: (elementId: string) => void;
   onShowOptions?: (prompt: string, options: string[]) => void;
+  onRequestOrderDetails?: (prompt: string) => void;
   
   registerActionTrigger?: (trigger: (actionName: string, data: any) => void) => void;
 }
@@ -21,6 +22,7 @@ export function VoiceAgent({
   onOpenFaq,
   onHighlightElement,
   onShowOptions,
+  onRequestOrderDetails,
   registerActionTrigger
 }: VoiceAgentProps) {
   const [status, setStatus] = useState<'idle' | 'connecting' | 'live' | 'error'>('idle');
@@ -97,6 +99,12 @@ export function VoiceAgent({
             onShowOptions(
               toolCall.arguments.prompt || 'Please select an option', 
               toolCall.arguments.options || []
+            );
+          }
+
+          if (toolCall.name === 'request_order_details' && onRequestOrderDetails) {
+            onRequestOrderDetails(
+              toolCall.arguments.prompt || 'Please enter your order details below:'
             );
           }
         },
