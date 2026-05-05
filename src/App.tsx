@@ -12,6 +12,8 @@ function App() {
   const [dynamicOptions, setDynamicOptions] = useState<{prompt: string, options: string[]} | null>(null);
   const [triggerAction, setTriggerAction] = useState<((name: string, data: any) => void) | null>(null);
   
+  const [currentView, setCurrentView] = useState<'home' | 'returns' | 'faq'>('home');
+  
   const [requestDetailsPrompt, setRequestDetailsPrompt] = useState<string | null>(null);
   const [detailEmail, setDetailEmail] = useState('');
   const [detailOrderId, setDetailOrderId] = useState('');
@@ -42,6 +44,13 @@ function App() {
     setRequestDetailsPrompt(prompt);
   };
 
+  const handleNavigate = (page: string) => {
+    const p = page.toLowerCase();
+    if (p.includes('return')) setCurrentView('returns');
+    else if (p.includes('faq')) setCurrentView('faq');
+    else setCurrentView('home');
+  };
+
   const handleDetailsSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (triggerAction) {
@@ -70,28 +79,60 @@ function App() {
     <div className="app-wrapper">
       <header>
         <div className="paper-container header-content">
-          <a href="/" className="logo">
+          <a href="#" onClick={(e) => { e.preventDefault(); handleNavigate('home'); }} className="logo">
             <Package className="logo-icon" size={28} />
             Poste
           </a>
           <nav className="nav-links">
-            <a href="#">Track Order</a>
-            <a href="#">Support</a>
-            <a href="#">Returns</a>
-            <a href="#">FAQ</a>
+            <a href="#" onClick={(e) => { e.preventDefault(); handleNavigate('home'); }}>Track Order</a>
+            <a href="#" onClick={(e) => { e.preventDefault(); handleNavigate('returns'); }}>Returns</a>
+            <a href="#" onClick={(e) => { e.preventDefault(); handleNavigate('faq'); }}>FAQ</a>
           </nav>
         </div>
       </header>
 
       <main className="paper-container">
-        <section className="hero-section animate-slide-up">
-          <h1 className="hero-title">How can we help you today?</h1>
-          <p className="hero-subtitle">Check your delivery status or find answers to your questions.</p>
-        </section>
+        {currentView === 'home' && (
+          <section className="hero-section animate-slide-up">
+            <h1 className="hero-title">How can we help you today?</h1>
+            <p className="hero-subtitle">Check your delivery status or find answers to your questions.</p>
+          </section>
+        )}
 
-        <div className="grid-layout">
+        {currentView === 'returns' && (
+          <section className="hero-section animate-slide-up">
+            <h1 className="hero-title">Returns Center</h1>
+            <p className="hero-subtitle">Start your return process below.</p>
+            <div className="paper-card" style={{ marginTop: '24px', textAlign: 'left', maxWidth: '600px', margin: '24px auto 0' }}>
+               <form onSubmit={(e) => e.preventDefault()}>
+                 <div style={{ display: 'flex', gap: '16px', marginBottom: '16px' }}>
+                   <input type="text" className="paper-input" placeholder="Order ID" style={{ flex: 1 }} />
+                   <input type="email" className="paper-input" placeholder="Email Address" style={{ flex: 1 }} />
+                 </div>
+                 <button type="button" className="paper-btn paper-btn-accent">Find Order</button>
+               </form>
+            </div>
+          </section>
+        )}
+
+        {currentView === 'faq' && (
+          <section className="hero-section animate-slide-up">
+            <h1 className="hero-title">Frequently Asked Questions</h1>
+            <p className="hero-subtitle">Find quick answers to common issues.</p>
+            <div className="paper-card" style={{ marginTop: '24px', textAlign: 'left', marginBottom: '16px', maxWidth: '800px', margin: '24px auto 16px' }}>
+              <h3>What is your return policy?</h3>
+              <p style={{ color: 'var(--paper-subtle)', marginTop: '8px' }}>We offer a hassle-free 30-day return policy. Items must be unused and in original packaging.</p>
+            </div>
+            <div className="paper-card" style={{ textAlign: 'left', maxWidth: '800px', margin: '0 auto' }}>
+              <h3>How long does shipping take?</h3>
+              <p style={{ color: 'var(--paper-subtle)', marginTop: '8px' }}>Standard shipping takes 3-5 business days. Express shipping is available for 1-2 business days.</p>
+            </div>
+          </section>
+        )}
+
+        <div className="grid-layout" style={{ marginTop: currentView === 'home' ? '0' : '48px' }}>
           {/* Tracking Widget */}
-          <div className="paper-card tracking-widget animate-slide-up delay-100">
+          <div className="paper-card tracking-widget animate-slide-up delay-100" style={{ display: currentView === 'home' ? 'block' : 'none' }}>
             <h2>Track Your Delivery</h2>
             <p style={{ color: 'var(--paper-subtle)', marginBottom: '24px' }}>
               Enter your tracking number, order ID, or email address to find your package.
@@ -156,9 +197,9 @@ function App() {
           </div>
 
           {/* Support Categories */}
-          <div className="support-section animate-slide-up delay-200">
-            <h2 style={{ fontSize: '2rem', marginBottom: '24px' }}>Quick Support</h2>
-            <div className="support-categories">
+          <div className="support-section animate-slide-up delay-200" style={{ gridColumn: currentView === 'home' ? 'auto' : '1 / -1' }}>
+            <h2 style={{ fontSize: '2rem', marginBottom: '24px', display: currentView === 'home' ? 'block' : 'none' }}>Quick Support</h2>
+            <div className="support-categories" style={{ gridTemplateColumns: currentView === 'home' ? 'repeat(auto-fit, minmax(250px, 1fr))' : 'minmax(250px, 400px)', justifyContent: currentView === 'home' ? 'start' : 'center' }}>
               {dynamicOptions && (
                 <div className="paper-card animate-slide-up" style={{ gridColumn: '1 / -1', border: '2px solid var(--paper-accent)' }}>
                   <h3 style={{ marginBottom: '16px' }}>{dynamicOptions.prompt}</h3>
@@ -176,7 +217,7 @@ function App() {
                 </div>
               )}
               
-              <div className={`paper-card category-card ${highlightedElement === 'faq' ? 'agent-active pulse-animation' : ''}`}>
+              <div className={`paper-card category-card ${highlightedElement === 'faq' ? 'agent-active pulse-animation' : ''}`} style={{ display: currentView === 'home' ? 'flex' : 'none' }}>
                 <HelpCircle className="category-icon" size={32} />
                 <h3 className="category-title">FAQ</h3>
                 <p className="category-desc">Answers to common questions about shipping and returns.</p>
@@ -184,7 +225,7 @@ function App() {
                   Read Articles <ArrowRight size={16} />
                 </div>
               </div>
-              <div className={`paper-card category-card ${highlightedElement === 'email' ? 'agent-active pulse-animation' : ''}`}>
+              <div className={`paper-card category-card ${highlightedElement === 'email' ? 'agent-active pulse-animation' : ''}`} style={{ display: currentView === 'home' ? 'flex' : 'none' }}>
                 <Mail className="category-icon" size={32} />
                 <h3 className="category-title">Email Us</h3>
                 <p className="category-desc">Expect a reply within 24 hours from our team.</p>
@@ -192,7 +233,7 @@ function App() {
                   Send Email <ArrowRight size={16} />
                 </div>
               </div>
-              <div className={`paper-card category-card ${highlightedElement === 'chat' ? 'agent-active pulse-animation' : ''}`}>
+              <div className={`paper-card category-card ${highlightedElement === 'chat' ? 'agent-active pulse-animation' : ''}`} style={{ display: currentView === 'home' ? 'flex' : 'none' }}>
                 <MessageSquare className="category-icon" size={32} />
                 <h3 className="category-title">Live Chat</h3>
                 <p className="category-desc">Available Mon-Fri, 9am - 5pm EST.</p>
@@ -208,6 +249,7 @@ function App() {
                 onHighlightElement={handleHighlight}
                 onShowOptions={handleShowOptions}
                 onRequestOrderDetails={handleRequestOrderDetails}
+                onNavigate={handleNavigate}
                 registerActionTrigger={handleRegisterActionTrigger}
               />
             </div>

@@ -11,6 +11,7 @@ interface VoiceAgentProps {
   onHighlightElement?: (elementId: string) => void;
   onShowOptions?: (prompt: string, options: string[]) => void;
   onRequestOrderDetails?: (prompt: string) => void;
+  onNavigate?: (page: string) => void;
   
   registerActionTrigger?: (trigger: (actionName: string, data: any) => void) => void;
 }
@@ -23,6 +24,7 @@ export function VoiceAgent({
   onHighlightElement,
   onShowOptions,
   onRequestOrderDetails,
+  onNavigate,
   registerActionTrigger
 }: VoiceAgentProps) {
   const [status, setStatus] = useState<'idle' | 'connecting' | 'live' | 'error'>('idle');
@@ -106,6 +108,10 @@ export function VoiceAgent({
             onRequestOrderDetails(
               toolCall.arguments.prompt || 'Please enter your order details below:'
             );
+          }
+
+          if (toolCall.name === 'navigate_to_page' && onNavigate) {
+            onNavigate(toolCall.arguments.page_name || 'home');
           }
         },
       });

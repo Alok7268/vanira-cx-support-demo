@@ -8,6 +8,7 @@ This is a demonstration application showcasing the integration of the **Vanira V
 - **Dynamic Context Updates**: Passes tracking numbers and context to the AI in real-time.
 - **Agent Interruption & Action Triggers**: The agent can handle external triggers and UI events during a call.
 - **Interactive Tools**: The AI agent can highlight UI elements, open FAQ articles, and request options dynamically.
+- **Page Navigation**: The AI agent can physically navigate users across different application views (e.g. from Home to the Returns Portal).
 
 ## Prerequisites
 
