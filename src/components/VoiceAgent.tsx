@@ -6,19 +6,19 @@ interface VoiceAgentProps {
   onTrackOrder?: (trackingNumber: string) => void;
   currentTrackingNumber?: string;
   currentTrackingStatus?: string;
-  
+
   onOpenFaq?: () => void;
   onHighlightElement?: (elementId: string) => void;
   onShowOptions?: (prompt: string, options: string[]) => void;
   onRequestOrderDetails?: (prompt: string) => void;
   onNavigate?: (page: string) => void;
-  
+
   registerActionTrigger?: (trigger: (actionName: string, data: any) => void) => void;
 }
 
-export function VoiceAgent({ 
-  onTrackOrder, 
-  currentTrackingNumber, 
+export function VoiceAgent({
+  onTrackOrder,
+  currentTrackingNumber,
   currentTrackingStatus,
   onOpenFaq,
   onHighlightElement,
@@ -45,8 +45,27 @@ export function VoiceAgent({
     if (registerActionTrigger) {
       registerActionTrigger((name, data) => {
         if (clientRef.current && status === 'live') {
+          
+          // Interrupt the current agent speech
           clientRef.current.triggerActionInterrupt();
-          clientRef.current.sendActionTrigger(name, data);
+          
+          // Small delay to ensure interrupt is processed before sending the new trigger
+          setTimeout(() => {
+            if (clientRef.current && status === 'live') {
+              // We bypass the SDK's nested sendActionTrigger and send a flat data structure
+              // including both 'name' and 'action_name' for maximum compatibility.
+              clientRef.current.sendEvent('client_action_trigger', {
+                data: {
+                  action_name: name,
+                  name: name,
+                  ...data
+                }
+              });
+              console.log(`🚀 [VoiceAgent] Sent client_action_trigger: ${name}`, data);
+            }
+          }, 300);
+        } else {
+          console.warn(`[Vanira SDK] Cannot send trigger "${name}": Client not connected or not live.`);
         }
       });
     }
@@ -64,13 +83,13 @@ export function VoiceAgent({
     try {
       clientRef.current = new WebRTCClient({
         // Using provided real IDs
-        agentId: '0222f134-a780-4346-b260-1d6a64e39987', 
+        agentId: '0222f134-a780-4346-b260-1d6a64e39987',
         apiKey: import.meta.env.VITE_VANIRA_API_KEY,
 
         onConnected: () => setStatus('live'),
-        onDisconnected: () => { 
-          setStatus('idle'); 
-          clientRef.current = null; 
+        onDisconnected: () => {
+          setStatus('idle');
+          clientRef.current = null;
         },
         onError: (err) => {
           console.error('Vanira SDK Error:', err);
@@ -82,12 +101,12 @@ export function VoiceAgent({
         onClientToolCall: (toolCall) => {
           if (toolCall.name === 'track_order' && onTrackOrder) {
             onTrackOrder(toolCall.arguments.tracking_number);
-            
+
             if (toolCall.execution_mode === 'blocking') {
               // Simulate order fetch and return
               setTimeout(() => {
-                clientRef.current?.sendToolResult(toolCall.tool_call_id, { 
-                  success: true, 
+                clientRef.current?.sendToolResult(toolCall.tool_call_id, {
+                  success: true,
                   status: 'In Transit',
                   expected_delivery: 'Tomorrow'
                 });
@@ -97,27 +116,37 @@ export function VoiceAgent({
 
           if (toolCall.name === 'open_faq_article' && onOpenFaq) {
             onOpenFaq();
+            clientRef.current?.sendToolResult(toolCall.tool_call_id, { success: true });
           }
 
           if (toolCall.name === 'highlight_ui_element' && onHighlightElement) {
             onHighlightElement(toolCall.arguments.element_id || 'email');
+            clientRef.current?.sendToolResult(toolCall.tool_call_id, { success: true });
           }
 
           if (toolCall.name === 'show_dynamic_options' && onShowOptions) {
             onShowOptions(
-              toolCall.arguments.prompt || 'Please select an option', 
+              toolCall.arguments.prompt || 'Please select an option',
               toolCall.arguments.options || []
             );
+            clientRef.current?.sendToolResult(toolCall.tool_call_id, { success: true });
           }
 
-          if (toolCall.name === 'open_popup_for_request_details' && onRequestOrderDetails) {
+          if (toolCall.name === 'open_popup_for_order_id_request_details' && onRequestOrderDetails) {
             onRequestOrderDetails(
               toolCall.arguments.prompt || 'Please enter your order details below:'
             );
+            clientRef.current?.sendToolResult(toolCall.tool_call_id, { success: true });
           }
 
           if (toolCall.name === 'navigate_to_page' && onNavigate) {
             onNavigate(toolCall.arguments.page_name || 'home');
+
+            // Always send a result back so the agent knows the navigation happened
+            clientRef.current?.sendToolResult(toolCall.tool_call_id, {
+              success: true,
+              navigated_to: toolCall.arguments.page_name || 'home'
+            });
           }
 
           if (toolCall.name === 'end_call') {
@@ -125,7 +154,7 @@ export function VoiceAgent({
           }
         },
       });
-      
+
       await clientRef.current.connect();
     } catch (err) {
       console.error('Failed to start call:', err);
@@ -139,7 +168,7 @@ export function VoiceAgent({
   };
 
   return (
-    <div 
+    <div
       className={`paper-card category-card ${status !== 'idle' ? 'agent-active' : ''}`}
       onClick={status === 'idle' ? startCall : undefined}
       style={status !== 'idle' ? { borderColor: 'var(--paper-accent)', cursor: 'default' } : {}}
@@ -152,9 +181,9 @@ export function VoiceAgent({
           </span>
         )}
       </div>
-      
+
       <h3 className="category-title">AI Voice Support</h3>
-      
+
       {status === 'idle' && (
         <>
           <p className="category-desc">Speak directly with our AI assistant for instant help.</p>
@@ -173,10 +202,10 @@ export function VoiceAgent({
 
       {status === 'live' && (
         <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <div style={{ 
-            background: 'rgba(0,0,0,0.02)', 
-            padding: '16px', 
-            borderRadius: '4px', 
+          <div style={{
+            background: 'rgba(0,0,0,0.02)',
+            padding: '16px',
+            borderRadius: '4px',
             border: '1px solid var(--paper-border)',
             minHeight: '80px',
             fontFamily: 'var(--font-serif)',
@@ -189,10 +218,10 @@ export function VoiceAgent({
           }}>
             {transcript ? `"${transcript}"` : "Listening..."}
           </div>
-          
-          <button 
+
+          <button
             onClick={endCall}
-            className="paper-btn" 
+            className="paper-btn"
             style={{ width: '100%', padding: '12px', fontSize: '0.9rem', backgroundColor: '#e0e0e0', color: 'var(--paper-fg)' }}
           >
             <PhoneOff size={16} /> End Call
@@ -206,9 +235,9 @@ export function VoiceAgent({
             <AlertCircle size={16} />
             <span style={{ fontSize: '0.9rem' }}>Connection failed. Check console or try again.</span>
           </div>
-          <button 
+          <button
             onClick={(e) => { e.stopPropagation(); startCall(); }}
-            className="paper-btn paper-btn-outline" 
+            className="paper-btn paper-btn-outline"
             style={{ padding: '8px', fontSize: '0.9rem' }}
           >
             Retry

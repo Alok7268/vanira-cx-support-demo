@@ -54,7 +54,11 @@ function App() {
   const handleDetailsSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (triggerAction) {
-      triggerAction('order_details_submitted', { email: detailEmail, order_id: detailOrderId });
+      triggerAction('order_details_submitted', { 
+        email: detailEmail, 
+        order_id: detailOrderId,
+        prompt: `The user has submitted their details. Email: ${detailEmail}, Order ID: ${detailOrderId}. Please acknowledge receipt and proceed.`
+      });
     }
     setRequestDetailsPrompt(null);
     setDetailEmail('');
@@ -73,6 +77,12 @@ function App() {
     e.preventDefault();
     if (!trackingNumber) return;
     doTrack(trackingNumber);
+    if (triggerAction) {
+      triggerAction('manual_track_order', { 
+        tracking_number: trackingNumber,
+        prompt: `The user has manually entered a tracking number: ${trackingNumber}. Please acknowledge this and provide the status for this order.`
+      });
+    }
   };
 
   return (
