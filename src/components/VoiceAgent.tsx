@@ -52,6 +52,12 @@ export function VoiceAgent({
     }
   }, [registerActionTrigger, status]);
 
+  const performEndCall = () => {
+    clientRef.current?.disconnect();
+    clientRef.current = null;
+    setStatus('idle');
+  };
+
   const startCall = async () => {
     setStatus('connecting');
     setTranscript('');
@@ -104,7 +110,7 @@ export function VoiceAgent({
             );
           }
 
-          if (toolCall.name === 'request_order_details' && onRequestOrderDetails) {
+          if (toolCall.name === 'open_popup_for_request_details' && onRequestOrderDetails) {
             onRequestOrderDetails(
               toolCall.arguments.prompt || 'Please enter your order details below:'
             );
@@ -112,6 +118,10 @@ export function VoiceAgent({
 
           if (toolCall.name === 'navigate_to_page' && onNavigate) {
             onNavigate(toolCall.arguments.page_name || 'home');
+          }
+
+          if (toolCall.name === 'end_call') {
+            performEndCall();
           }
         },
       });
@@ -125,9 +135,7 @@ export function VoiceAgent({
 
   const endCall = (e: React.MouseEvent) => {
     e.stopPropagation();
-    clientRef.current?.disconnect();
-    clientRef.current = null;
-    setStatus('idle');
+    performEndCall();
   };
 
   return (
