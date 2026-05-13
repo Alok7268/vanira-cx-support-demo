@@ -47,8 +47,14 @@ function App() {
     setRequestDetailsPrompt(prompt);
   };
 
-  const handleNavigate = (page: string) => {
-    const p = page.toLowerCase();
+  const handleNavigate = (path: string) => {
+    if (path.startsWith('/')) {
+      navigate(path);
+      return;
+    }
+    
+    // Fallback for names instead of paths
+    const p = path.toLowerCase();
     if (p.includes('return')) navigate('/returns');
     else if (p.includes('faq')) navigate('/faq');
     else navigate('/');

@@ -145,30 +145,31 @@ export function VoiceAgent({
           }
 
           if (toolCall.name === 'navigate_to_page' && onNavigate) {
-            let targetPage = toolCall.arguments?.page_name;
+            // Support either 'path' or legacy 'page_name' from the backend
+            let targetPath = toolCall.arguments?.path || toolCall.arguments?.page_name;
 
-            // Fallback: if the AI forgets to pass the page_name argument, extract it from the user's recent transcript
-            if (!targetPage && transcript) {
+            // Fallback: if the AI forgets to pass the argument, extract it from the user's recent transcript
+            if (!targetPath && transcript) {
               const lowerTranscript = transcript.toLowerCase();
-              if (lowerTranscript.includes('return')) targetPage = 'returns';
-              else if (lowerTranscript.includes('faq')) targetPage = 'faq';
-              else targetPage = 'home';
+              if (lowerTranscript.includes('return')) targetPath = '/returns';
+              else if (lowerTranscript.includes('faq')) targetPath = '/faq';
+              else targetPath = '/';
             }
             
             // Final fallback to home
-            targetPage = targetPage || 'home';
+            targetPath = targetPath || '/';
 
             // If the LLM uses navigate_to_page to view the FAQ, also trigger the modal
-            if (targetPage === 'faq' && onOpenFaq) {
+            if (targetPath.includes('faq') && onOpenFaq) {
               onOpenFaq();
             }
 
-            onNavigate(targetPage);
+            onNavigate(targetPath);
 
             // Always send a result back so the agent knows the navigation happened
             clientRef.current?.sendToolResult(toolCall.tool_call_id, {
               success: true,
-              navigated_to: targetPage
+              navigated_to: targetPath
             });
           }
 
