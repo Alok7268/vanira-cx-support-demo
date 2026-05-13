@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { Package, Search, Mail, Phone, MessageSquare, HelpCircle, ArrowRight, Truck, CheckCircle2, Clock, X } from 'lucide-react';
+import { Package, Mail, MessageSquare, HelpCircle, ArrowRight, Truck, CheckCircle2, Clock, X } from 'lucide-react';
 import { VoiceAgent } from './components/VoiceAgent';
 import './App.css';
 

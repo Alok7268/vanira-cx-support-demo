@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { WebRTCClient } from '@vanira/sdk';
-import { Mic, Phone, PhoneOff, Loader2, Volume2, AlertCircle } from 'lucide-react';
+import { Phone, PhoneOff, Loader2, Volume2, AlertCircle } from 'lucide-react';
 
 interface VoiceAgentProps {
   onTrackOrder?: (trackingNumber: string) => void;
@@ -95,7 +95,7 @@ export function VoiceAgent({
           console.error('Vanira SDK Error:', err);
           setStatus('error');
         },
-        onTranscription: (text, isFinal) => {
+        onTranscription: (text) => {
           setTranscript(text);
         },
         onClientToolCall: (toolCall) => {
