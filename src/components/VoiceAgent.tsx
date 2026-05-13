@@ -140,12 +140,25 @@ export function VoiceAgent({
           }
 
           if (toolCall.name === 'navigate_to_page' && onNavigate) {
-            onNavigate(toolCall.arguments.page_name || 'home');
+            let targetPage = toolCall.arguments?.page_name;
+
+            // Fallback: if the AI forgets to pass the page_name argument, extract it from the user's recent transcript
+            if (!targetPage && transcript) {
+              const lowerTranscript = transcript.toLowerCase();
+              if (lowerTranscript.includes('return')) targetPage = 'returns';
+              else if (lowerTranscript.includes('faq')) targetPage = 'faq';
+              else targetPage = 'home';
+            }
+            
+            // Final fallback to home
+            targetPage = targetPage || 'home';
+
+            onNavigate(targetPage);
 
             // Always send a result back so the agent knows the navigation happened
             clientRef.current?.sendToolResult(toolCall.tool_call_id, {
               success: true,
-              navigated_to: toolCall.arguments.page_name || 'home'
+              navigated_to: targetPage
             });
           }
 
