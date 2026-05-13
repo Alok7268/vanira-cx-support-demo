@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { Package, Mail, MessageSquare, HelpCircle, ArrowRight, Truck, CheckCircle2, Clock, X } from 'lucide-react';
 import { VoiceAgent } from './components/VoiceAgent';
 import './App.css';
@@ -12,7 +13,9 @@ function App() {
   const [dynamicOptions, setDynamicOptions] = useState<{prompt: string, options: string[]} | null>(null);
   const [triggerAction, setTriggerAction] = useState<((name: string, data: any) => void) | null>(null);
   
-  const [currentView, setCurrentView] = useState<'home' | 'returns' | 'faq'>('home');
+  const navigate = useNavigate();
+  const location = useLocation();
+  const currentView = location.pathname.includes('returns') ? 'returns' : location.pathname.includes('faq') ? 'faq' : 'home';
   
   const [requestDetailsPrompt, setRequestDetailsPrompt] = useState<string | null>(null);
   const [detailEmail, setDetailEmail] = useState('');
@@ -46,9 +49,9 @@ function App() {
 
   const handleNavigate = (page: string) => {
     const p = page.toLowerCase();
-    if (p.includes('return')) setCurrentView('returns');
-    else if (p.includes('faq')) setCurrentView('faq');
-    else setCurrentView('home');
+    if (p.includes('return')) navigate('/returns');
+    else if (p.includes('faq')) navigate('/faq');
+    else navigate('/');
   };
 
   const handleDetailsSubmit = (e: React.FormEvent) => {
@@ -89,14 +92,14 @@ function App() {
     <div className="app-wrapper">
       <header>
         <div className="paper-container header-content">
-          <a href="#" onClick={(e) => { e.preventDefault(); handleNavigate('home'); }} className="logo">
+          <Link to="/" className="logo">
             <Package className="logo-icon" size={28} />
             Poste
-          </a>
+          </Link>
           <nav className="nav-links">
-            <a href="#" onClick={(e) => { e.preventDefault(); handleNavigate('home'); }}>Track Order</a>
-            <a href="#" onClick={(e) => { e.preventDefault(); handleNavigate('returns'); }}>Returns</a>
-            <a href="#" onClick={(e) => { e.preventDefault(); handleNavigate('faq'); }}>FAQ</a>
+            <Link to="/">Track Order</Link>
+            <Link to="/returns">Returns</Link>
+            <Link to="/faq">FAQ</Link>
           </nav>
         </div>
       </header>
