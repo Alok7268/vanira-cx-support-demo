@@ -97,6 +97,11 @@ export function VoiceAgent({
         },
         onTranscription: (text) => {
           setTranscript(text);
+          // Magic keyword trigger for FAQ to ensure it pops up even if the LLM hallucinates the tool name
+          const lower = text.toLowerCase();
+          if (onOpenFaq && (lower.includes('show me the faq') || lower.includes('open the faq') || lower.includes('show the faq') || lower.includes('view the faq'))) {
+            onOpenFaq();
+          }
         },
         onClientToolCall: (toolCall) => {
           if (toolCall.name === 'track_order' && onTrackOrder) {
@@ -114,7 +119,7 @@ export function VoiceAgent({
             }
           }
 
-          if (toolCall.name === 'open_faq_article' && onOpenFaq) {
+          if ((toolCall.name === 'open_faq_article' || toolCall.name === 'open_faq') && onOpenFaq) {
             onOpenFaq();
             clientRef.current?.sendToolResult(toolCall.tool_call_id, { success: true });
           }
@@ -152,6 +157,11 @@ export function VoiceAgent({
             
             // Final fallback to home
             targetPage = targetPage || 'home';
+
+            // If the LLM uses navigate_to_page to view the FAQ, also trigger the modal
+            if (targetPage === 'faq' && onOpenFaq) {
+              onOpenFaq();
+            }
 
             onNavigate(targetPage);
 
